@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">OJA</string>
+    <string name="google_maps_key">YOUR_MAPS_API_KEY_HERE</string>
+    <string name="welcome_title">Welcome to OJA</string>
+    <string name="welcome_sub">Your neighborhood market—street to doorstep</string>
+</resources>
