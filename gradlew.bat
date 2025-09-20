@@ -33,13 +33,114 @@ set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
 set WRAPPER_JAR=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+set WRAPPER_PROPS=%APP_HOME%\gradle\wrapper\gradle-wrapper.properties
 if not exist "%WRAPPER_JAR%" (
+    set WRAPPER_VERSION=8.7
+    set DISTRIBUTION_URL=
+    if exist "%WRAPPER_PROPS%" (
+        for /f "usebackq tokens=1* delims==" %%A in ("%WRAPPER_PROPS%") do (
+            if /I "%%A"=="distributionUrl" set DISTRIBUTION_URL=%%B
+        )
+    )
+    if defined DISTRIBUTION_URL set DISTRIBUTION_URL=%DISTRIBUTION_URL:\=%
+    if defined DISTRIBUTION_URL (
+        for /f "tokens=2 delims=-" %%A in ("%DISTRIBUTION_URL%") do set WRAPPER_VERSION=%%A
+    )
+    set WRAPPER_DOWNLOAD_URL=https://repo.gradle.org/gradle/libs-releases-local/org/gradle/gradle-wrapper/%WRAPPER_VERSION%/gradle-wrapper-%WRAPPER_VERSION%.jar
+    powershell -NoProfile -Command "try { (New-Object Net.WebClient).DownloadFile('%WRAPPER_DOWNLOAD_URL%', '%WRAPPER_JAR%') } catch { exit 1 }"
+    if not exist "%WRAPPER_JAR%" (
+        if not defined DISTRIBUTION_URL set DISTRIBUTION_URL=https://services.gradle.org/distributions/gradle-%WRAPPER_VERSION%-bin.zip
+        powershell -NoProfile -Command "
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            function Get-WrapperBytes([string] $ArchivePath) {
+                $zip = [System.IO.Compression.ZipFile]::OpenRead($ArchivePath)
+                try {
+                    $entry = $zip.Entries | Where-Object { $_.FullName -like 'gradle-*/lib/plugins/gradle-wrapper-*.jar' } | Select-Object -First 1
+                    if (-not $entry) {
+                        $entry = $zip.Entries | Where-Object { $_.FullName -like 'gradle-*/lib/gradle-wrapper-*.jar' } | Select-Object -First 1
+                    }
+                    if (-not $entry) { throw 'gradle-wrapper jar not found' }
+                    $pluginStream = $entry.Open()
+                    try {
+                        $pluginBuffer = New-Object System.IO.MemoryStream
+                        $pluginStream.CopyTo($pluginBuffer)
+                    } finally {
+                        $pluginStream.Dispose()
+                    }
+                    $pluginBuffer.Position = 0
+                    $pluginArchive = New-Object System.IO.Compression.ZipArchive($pluginBuffer, [System.IO.Compression.ZipArchiveMode]::Read, $false)
+                    try {
+                        $inner = $pluginArchive.GetEntry('gradle-wrapper.jar')
+                        if ($inner) {
+                            $innerStream = $inner.Open()
+                            try {
+                                $result = New-Object System.IO.MemoryStream
+                                $innerStream.CopyTo($result)
+                            } finally {
+                                $innerStream.Dispose()
+                            }
+                            $bytes = $result.ToArray()
+                        } else {
+                            $bytes = $pluginBuffer.ToArray()
+                        }
+                    } finally {
+                        $pluginArchive.Dispose()
+                    }
+                } finally {
+                    $zip.Dispose()
+                }
+                return $bytes
+            }
+
+            function Ensure-WrapperManifest([string] $JarPath) {
+                $fs = [System.IO.File]::Open($JarPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
+                try {
+                    $archive = New-Object System.IO.Compression.ZipArchive($fs, [System.IO.Compression.ZipArchiveMode]::Update)
+                    $entry = $archive.GetEntry('META-INF/MANIFEST.MF')
+                    if (-not $entry) { return }
+                    $reader = New-Object System.IO.StreamReader($entry.Open())
+                    $content = $reader.ReadToEnd()
+                    $reader.Dispose()
+                    $mainPresent = $content -match '(?im)^Main-Class:'
+                    $nativePresent = $content -match '(?im)^Enable-Native-Access:'
+                    if ($mainPresent -and $nativePresent) { return }
+                    $lines = $content -split "`r?`n" | Where-Object { $_ }
+                    if (-not $mainPresent) { $lines += 'Main-Class: org.gradle.wrapper.GradleWrapperMain' }
+                    if (-not $nativePresent) { $lines += 'Enable-Native-Access: ALL-UNNAMED' }
+                    $entry.Delete()
+                    $newEntry = $archive.CreateEntry('META-INF/MANIFEST.MF', [System.IO.Compression.CompressionLevel]::NoCompression)
+                    $writer = New-Object System.IO.StreamWriter($newEntry.Open())
+                    $writer.Write(([string]::Join("`n", $lines) + "`n"))
+                    $writer.Dispose()
+                } finally {
+                    $archive.Dispose()
+                    $fs.Dispose()
+                }
+            }
+
+            try {
+                $tmp = New-Item -ItemType Directory -Path ([System.IO.Path]::Combine([System.IO.Path]::GetTempPath(),[System.Guid]::NewGuid().ToString()))
+                $archive = Join-Path $tmp.FullName 'gradle-distribution.zip'
+                (New-Object Net.WebClient).DownloadFile('%DISTRIBUTION_URL%', $archive)
+                $bytes = Get-WrapperBytes $archive
+                [System.IO.File]::WriteAllBytes('%WRAPPER_JAR%', $bytes)
+                Ensure-WrapperManifest '%WRAPPER_JAR%'
+            } catch {
+                if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
+                exit 1
+            }
+            if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
+        "
+    )
+    if exist "%WRAPPER_JAR%" goto wrapperReady
     echo Gradle wrapper JAR missing; attempting to use system Gradle... 1>&2
     gradle %*
     if %ERRORLEVEL% equ 0 goto end
-    echo Failed to run Gradle because the wrapper JAR is absent and no system Gradle is available. 1>&2
+    echo Failed to run Gradle because the wrapper JAR is absent and could not be downloaded. 1>&2
     goto fail
 )
+
+:wrapperReady
 
 @rem Resolve any "." and ".." in APP_HOME to make it shorter.
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi

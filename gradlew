@@ -103,12 +103,189 @@ die () {
 } >&2
 
 WRAPPER_JAR="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+WRAPPER_PROPERTIES="$APP_HOME/gradle/wrapper/gradle-wrapper.properties"
+
+download_file() {
+    src="$1"
+    dest="$2"
+    if [ -z "$src" ] || [ -z "$dest" ]; then
+        return 1
+    fi
+    if command -v curl >/dev/null 2>&1; then
+        if curl -fsSL "$src" -o "$dest"; then
+            return 0
+        fi
+    fi
+    if command -v wget >/dev/null 2>&1; then
+        if wget -q "$src" -O "$dest"; then
+            return 0
+        fi
+    fi
+    rm -f "$dest"
+    return 1
+}
+
+extract_wrapper_from_zip() {
+    archive="$1"
+    if [ ! -f "$archive" ]; then
+        return 1
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$archive" "$WRAPPER_JAR" <<'PY'
+import io
+import sys
+from pathlib import Path
+from typing import Optional
+from zipfile import ZipFile
+import zipfile
+
+archive = Path(sys.argv[1])
+target = Path(sys.argv[2])
+
+def ensure_manifest(jar_bytes: bytes) -> bytes:
+    with ZipFile(io.BytesIO(jar_bytes)) as src:
+        try:
+            manifest = src.read('META-INF/MANIFEST.MF').decode('utf-8', 'replace')
+        except KeyError:
+            return jar_bytes
+        lines = [line.rstrip('\r\n') for line in manifest.splitlines() if line.strip()]
+        main_present = any(line.startswith('Main-Class:') for line in lines)
+        native_present = any(line.startswith('Enable-Native-Access:') for line in lines)
+        if main_present and native_present:
+            return jar_bytes
+        if not main_present:
+            lines.append('Main-Class: org.gradle.wrapper.GradleWrapperMain')
+        if not native_present:
+            lines.append('Enable-Native-Access: ALL-UNNAMED')
+        new_manifest = '\n'.join(lines) + '\n'
+        buffer = io.BytesIO()
+        with ZipFile(buffer, 'w') as dst:
+            for item in src.infolist():
+                data = src.read(item)
+                if item.filename == 'META-INF/MANIFEST.MF':
+                    data = new_manifest.encode('utf-8')
+                info = zipfile.ZipInfo(item.filename)
+                info.date_time = item.date_time
+                info.compress_type = item.compress_type
+                info.comment = item.comment
+                info.create_system = item.create_system
+                info.create_version = item.create_version
+                info.extract_version = item.extract_version
+                info.flag_bits = item.flag_bits
+                info.external_attr = item.external_attr
+                info.internal_attr = item.internal_attr
+                dst.writestr(info, data)
+        return buffer.getvalue()
+
+def extract_nested(jar_bytes: bytes) -> Optional[bytes]:
+    with ZipFile(io.BytesIO(jar_bytes)) as nested:
+        for entry in nested.infolist():
+            if entry.filename.endswith('gradle-wrapper.jar'):
+                return ensure_manifest(nested.read(entry))
+    return ensure_manifest(jar_bytes)
+
+def find_wrapper(zf: ZipFile) -> Optional[bytes]:
+    preferred = None
+    fallback = None
+    for entry in zf.infolist():
+        name = entry.filename
+        if not name.endswith('.jar') or 'gradle-wrapper' not in name or '/lib/' not in name:
+            continue
+        data = zf.read(entry)
+        if '/lib/plugins/' in name:
+            preferred = data
+            break
+        if fallback is None:
+            fallback = data
+    blob = preferred or fallback
+    if blob is None:
+        return None
+    extracted = extract_nested(blob)
+    return extracted
+
+with ZipFile(archive) as outer:
+    payload = find_wrapper(outer)
+
+if payload is None:
+    sys.exit(1)
+
+target.parent.mkdir(parents=True, exist_ok=True)
+target.write_bytes(payload)
+PY
+        status=$?
+        if [ $status -eq 0 ]; then
+            return 0
+        fi
+    fi
+    if command -v unzip >/dev/null 2>&1; then
+        tmp_extract=$(mktemp -d 2>/dev/null || mktemp -d -t gradle-wrapper-extract)
+        if unzip -qq "$archive" "gradle-*/lib/plugins/gradle-wrapper-*.jar" -d "$tmp_extract" 2>/dev/null; then
+            plugin=$(find "$tmp_extract" -name "gradle-wrapper-*.jar" -print | head -n 1)
+            if [ -n "$plugin" ]; then
+                if unzip -p "$plugin" gradle-wrapper.jar > "$WRAPPER_JAR" 2>/dev/null; then
+                    rm -rf "$tmp_extract"
+                    return 0
+                fi
+            fi
+        fi
+        if unzip -qq "$archive" "gradle-*/lib/gradle-wrapper-*.jar" -d "$tmp_extract" 2>/dev/null; then
+            plugin=$(find "$tmp_extract" -name "gradle-wrapper-*.jar" -print | head -n 1)
+            if [ -n "$plugin" ]; then
+                if unzip -p "$plugin" gradle-wrapper.jar > "$WRAPPER_JAR" 2>/dev/null; then
+                    rm -rf "$tmp_extract"
+                    return 0
+                fi
+            fi
+        fi
+        rm -rf "$tmp_extract"
+    fi
+    return 1
+}
+
+download_wrapper() {
+    version="$1"
+    distribution_url="$2"
+    if ! mkdir -p "${WRAPPER_JAR%/*}" >/dev/null 2>&1; then
+        return 1
+    fi
+
+    jar_url="https://repo.gradle.org/gradle/libs-releases-local/org/gradle/gradle-wrapper/${version}/gradle-wrapper-${version}.jar"
+    if download_file "$jar_url" "$WRAPPER_JAR"; then
+        return 0
+    fi
+
+    tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t gradle-wrapper)
+    archive="$tmpdir/gradle-distribution.zip"
+    if download_file "$distribution_url" "$archive"; then
+        if extract_wrapper_from_zip "$archive"; then
+            rm -rf "$tmpdir"
+            return 0
+        fi
+    fi
+    rm -rf "$tmpdir"
+    return 1
+}
+
 if [ ! -f "$WRAPPER_JAR" ]; then
-    if command -v gradle >/dev/null 2>&1; then
+    WRAPPER_VERSION=""
+    DISTRIBUTION_URL=""
+    if [ -f "$WRAPPER_PROPERTIES" ]; then
+        WRAPPER_VERSION=$(sed -n 's#.*gradle-\([0-9.][0-9.]*\)-.*#\1#p' "$WRAPPER_PROPERTIES" | head -n 1)
+        DISTRIBUTION_URL=$(sed -n 's#^distributionUrl=##p' "$WRAPPER_PROPERTIES" | head -n 1 | sed 's#\\##g')
+    fi
+    if [ -z "$WRAPPER_VERSION" ]; then
+        WRAPPER_VERSION="8.7"
+    fi
+    if [ -z "$DISTRIBUTION_URL" ]; then
+        DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-${WRAPPER_VERSION}-bin.zip"
+    fi
+    if download_wrapper "$WRAPPER_VERSION" "$DISTRIBUTION_URL"; then
+        :
+    elif command -v gradle >/dev/null 2>&1; then
         warn "Gradle wrapper JAR missing; delegating to system Gradle"
         exec gradle "$@"
     else
-        die "ERROR: gradle/wrapper/gradle-wrapper.jar is missing and no Gradle installation is available."
+        die "ERROR: gradle/wrapper/gradle-wrapper.jar is missing and could not be downloaded. Install Gradle or provide curl/wget and unzip/python3."
     fi
 fi
 
