@@ -1,12 +1,15 @@
 # Offline Build Support
 
 The Gradle wrapper JAR is excluded from the repository to keep binaries out of version control.
-To allow fully offline builds, a Base64-encoded copy of `gradle-wrapper-8.7.jar` is stored at
-`gradle/wrapper/gradle-wrapper.jar.base64`.
 
-Both `gradlew` and `gradlew.bat` decode this embedded payload automatically whenever the wrapper
-JAR is missing. This works without network access as long as Python 3, the POSIX `base64` utility,
-OpenSSL, or PowerShell are available.
+When `gradlew` or `gradlew.bat` detect that `gradle/wrapper/gradle-wrapper.jar` is missing they:
 
-If none of the decoders are present, place the Gradle wrapper JAR at
-`gradle/wrapper/gradle-wrapper.jar` manually before invoking the wrapper scripts.
+1. Determine the desired Gradle version from `gradle/wrapper/gradle-wrapper.properties`.
+2. Attempt to download the wrapper JAR directly from `repo.gradle.org`.
+3. Fall back to downloading the configured Gradle distribution and extracting the wrapper JAR from it.
+4. Delegate to a system-wide `gradle` installation if both downloads fail.
+
+In offline environments you can still run builds by copying a compatible
+`gradle-wrapper.jar` into `gradle/wrapper/` ahead of time (for example, from an
+internal artifact cache). Once the file is present the wrapper scripts will use
+it without reaching for the network.

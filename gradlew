@@ -104,42 +104,6 @@ die () {
 
 WRAPPER_JAR="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
 WRAPPER_PROPERTIES="$APP_HOME/gradle/wrapper/gradle-wrapper.properties"
-WRAPPER_BASE64="$APP_HOME/gradle/wrapper/gradle-wrapper.jar.base64"
-
-extract_embedded_wrapper() {
-    if [ ! -f "$WRAPPER_BASE64" ]; then
-        return 1
-    fi
-    mkdir -p "${WRAPPER_JAR%/*}" >/dev/null 2>&1 || true
-    if command -v python3 >/dev/null 2>&1; then
-        if python3 - "$WRAPPER_BASE64" "$WRAPPER_JAR" <<'PY'
-import base64
-import sys
-from pathlib import Path
-
-src = Path(sys.argv[1])
-dst = Path(sys.argv[2])
-payload = base64.b64decode(src.read_bytes())
-dst.write_bytes(payload)
-PY
-        then
-            return 0
-        fi
-    fi
-    if command -v base64 >/dev/null 2>&1; then
-        if base64 -d "$WRAPPER_BASE64" > "$WRAPPER_JAR" 2>/dev/null || \
-           base64 --decode "$WRAPPER_BASE64" > "$WRAPPER_JAR" 2>/dev/null; then
-            return 0
-        fi
-    fi
-    if command -v openssl >/dev/null 2>&1; then
-        if openssl base64 -d -in "$WRAPPER_BASE64" -out "$WRAPPER_JAR" 2>/dev/null; then
-            return 0
-        fi
-    fi
-    rm -f "$WRAPPER_JAR"
-    return 1
-}
 
 download_file() {
     src="$1"
@@ -303,14 +267,11 @@ download_wrapper() {
 }
 
 if [ ! -f "$WRAPPER_JAR" ]; then
-    if extract_embedded_wrapper; then
-        :
-    else
-        WRAPPER_VERSION=""
-        DISTRIBUTION_URL=""
-        if [ -f "$WRAPPER_PROPERTIES" ]; then
-            WRAPPER_VERSION=$(sed -n 's#.*gradle-\([0-9.][0-9.]*\)-.*#\1#p' "$WRAPPER_PROPERTIES" | head -n 1)
-            DISTRIBUTION_URL=$(sed -n 's#^distributionUrl=##p' "$WRAPPER_PROPERTIES" | head -n 1 | sed 's#\\##g')
+    WRAPPER_VERSION=""
+    DISTRIBUTION_URL=""
+    if [ -f "$WRAPPER_PROPERTIES" ]; then
+        WRAPPER_VERSION=$(sed -n 's#.*gradle-\([0-9.][0-9.]*\)-.*#\1#p' "$WRAPPER_PROPERTIES" | head -n 1)
+        DISTRIBUTION_URL=$(sed -n 's#^distributionUrl=##p' "$WRAPPER_PROPERTIES" | head -n 1 | sed 's#\\##g')
     fi
     if [ -z "$WRAPPER_VERSION" ]; then
         WRAPPER_VERSION="8.7"
@@ -318,14 +279,13 @@ if [ ! -f "$WRAPPER_JAR" ]; then
     if [ -z "$DISTRIBUTION_URL" ]; then
         DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-${WRAPPER_VERSION}-bin.zip"
     fi
-        if download_wrapper "$WRAPPER_VERSION" "$DISTRIBUTION_URL"; then
-            :
-        elif command -v gradle >/dev/null 2>&1; then
-            warn "Gradle wrapper JAR missing; delegating to system Gradle"
-            exec gradle "$@"
-        else
-            die "ERROR: gradle/wrapper/gradle-wrapper.jar is missing and could not be downloaded. Install Gradle or provide curl/wget and unzip/python3."
-        fi
+    if download_wrapper "$WRAPPER_VERSION" "$DISTRIBUTION_URL"; then
+        :
+    elif command -v gradle >/dev/null 2>&1; then
+        warn "Gradle wrapper JAR missing; delegating to system Gradle"
+        exec gradle "$@"
+    else
+        die "ERROR: gradle/wrapper/gradle-wrapper.jar is missing and could not be downloaded. Install Gradle or provide curl/wget and unzip/python3."
     fi
 fi
 
