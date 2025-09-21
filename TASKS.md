@@ -2,6 +2,71 @@
 
 This backlog converts the production blueprint into execution-ready tasks. Each task includes the concrete outcomes, dependencies, and validation steps needed to ship the feature without regressions.
 
+## Baseline & context
+
+### Current app snapshot (what already exists)
+- Jetpack Compose single-module client backed by in-memory `Repo` implementations for catalog, cart, checkout, and courier flows.
+- Buyer experience covers browse → cart → checkout hand-off with simulated logistics timeline once a Google Maps key is provided.
+- Vendor onboarding, transporter signup, and payments screens are present as stubs awaiting real backend contracts.
+
+### Hard constraints from Plan 2
+- Payments rely on backend-initialised Paystack/Flutterwave flows before invoking the Android SDK hand-off.
+- Google Maps APIs require billing, quota governance, autocomplete session reuse, and cached geocodes to keep spend predictable.
+- Android background location must comply with Play policy: foreground-first request, persistent notification, and cadence between 15–30 seconds.
+- NDPA compliance requires a Data Protection Officer, processor DPAs, 72-hour breach notification workflows, and subject-rights tooling.
+- Logistics phase starts with Sendbox, followed by Kwik via a pluggable `LogisticsProvider` abstraction.
+
+## Production blueprint (no-gap delivery plan)
+
+### Stage 0 – Foundation & guardrails
+- **Organisational readiness:** Appoint DPO, document NDPA processing records, and finalise incident-response playbooks before ingesting production data.
+- **Processor agreements:** Countersign Paystack, Flutterwave, Sendbox, and Kwik DPAs; enable Google Cloud billing with Maps budget alerts.
+- **Platform setup:** Scaffold backend monorepo (Spring Boot or NestJS), configure CI, and provision managed Postgres + Redis through IaC.
+- **Security & IAM:** Stand up JWT auth service with refresh rotation, allocate least-privilege service accounts, and centralise secrets in Secret Manager or Vault with audit logging.
+
+### Stage A – Payments & address correctness
+- **Backend:** Deliver auth/catalog APIs, `/orders` + `/orders/{id}/pay`, server-side Paystack/Flutterwave initialisation, webhook receivers, and address CRUD with cached geocodes.
+- **Android:** Replace simulated repositories with Retrofit/Moshi remotes wired via Hilt, integrate payment SDKs, add `AddressPickerScreen`, and localise onboarding in EN/Pidgin/Yoruba/Hausa/Igbo.
+- **Ops & QA:** Run automated contract tests, Android instrumentation for checkout/address, and perform the ₦100 end-to-end payment validation with receipts and NDPA logging.
+
+### Stage B – Real-time logistics
+- **Backend:** Introduce `LogisticsProvider`, ship Sendbox adapter, auto-book shipments on paid orders, and expose `/ws/orders/{id}` WebSocket timelines.
+- **Android:** Build `LogisticsRepository`, foreground tracking service with persistent notification, live order detail polyline/ETA, and transporter job feed via `/ws/jobs`.
+- **Ops & QA:** Load-test WebSocket hub (<300 ms p95) and confirm Lagos/Abuja field updates every 15–30 seconds without battery regressions.
+
+### Stage C – Vendor tooling
+- **Backend:** Vendor onboarding workflow with KYC-lite bank verification, geo-coded stores, unlimited product uploads, signed URLs, and bulk CSV/ZIP ingestion queues.
+- **Android:** Compose screens for vendor dashboard, product CRUD with WorkManager upload queue, bulk import entry points, and conflict resolution UX.
+- **Ops & QA:** Stress-test 200 images/100 products, pen-test storage permissions, and ensure dashboards reflect backend KPIs.
+
+### Stage D – Courier operations
+- **Backend:** Atomic job-claim endpoint, navigation links, job status lifecycle with POD storage, COD reconciliation, and earnings ledger.
+- **Android:** Courier foreground service with policy-compliant location cadence, POD capture (camera + signature), dispute submission, and job filters.
+- **Ops & QA:** Concurrency stress testing (≥50 simultaneous claims) plus battery/performance profiling on low-end devices.
+
+### Stage E – Trust, support, analytics
+- **Backend:** Dispute ticketing with evidence uploads, NDPA-compliant data export/delete flows, breach-notification tracking, and analytics pipeline (BigQuery/Amplitude).
+- **Android:** Privacy center, consent controls, saved cards, support entry points, Crashlytics toggles, and FCM topic management with notification grouping.
+- **Ops & QA:** Validate dispute lifecycle end-to-end, run data-subject request drills, and monitor SLIs (API p95, WebSocket uptime, webhook ack <2 s).
+
+### Cross-cutting tracks
+- **Logistics expansion:** Add Kwik adapter to provider abstraction with geo/SLA/cost routing and A/B cost analysis.
+- **Fraud & risk:** Implement COD limits, velocity checks, disposable email blocking, device fingerprinting, and Trust & Safety dashboards.
+- **Maps & cost optimisation:** Cache geocodes, reuse autocomplete sessions, batch directions calls, and enforce Maps budget alerts.
+- **Localization & performance:** Maintain translation coverage, support landmark-based addresses and driver notes, throttle background work on low battery, and lazy-load imagery.
+
+## Task backlog (execution-sized work packages)
+1. Stand up compliant backend foundation (Stage 0 outputs).
+2. Replace Android in-memory repositories with production APIs (Stage A networking).
+3. Deliver Stage A payment & address flows and ₦100 validation.
+4. Launch Stage B logistics realtime loop with Sendbox adapter and Android tracking service.
+5. Complete Stage C vendor tooling across backend and Android.
+6. Polish Stage D courier experience with POD, earnings, and concurrency resilience.
+7. Roll out Stage E trust/support/analytics capabilities.
+8. Embed risk/compliance monitoring plus Maps/Fraud cross-cutting tracks.
+
+## Detailed staged task breakdown
+
 ## Execution Order
 
 All workstreams move strictly in sequence. Stage 0 is a hard gate before any feature code ships. Stage A begins only after the Stage 0 exit criteria are signed off. Subsequent stages (B → E) and cross-cutting tracks start once Stage A is live in staging with the ₦100 payment validation completed.
