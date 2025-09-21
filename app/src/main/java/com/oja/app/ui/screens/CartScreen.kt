@@ -31,8 +31,8 @@ fun CartScreen(nav: NavHostController) {
             groups.forEach { (storeId, storeItems) ->
                 item { Text("Store: $storeId") }
                 items(storeItems.size) { i ->
-                    val it = storeItems[i]
-                    Text("${it.product.name} x${it.qty} — ₦${it.product.price}")
+                    val storeItem = storeItems[i]
+                    Text("${storeItem.product.name} x${storeItem.qty} — ₦${storeItem.product.price}")
                 }
             }
         }
