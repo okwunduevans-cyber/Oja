@@ -28,11 +28,11 @@ fun CartScreen(nav: NavHostController) {
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         LazyColumn(Modifier.weight(1f)) {
-            groups.forEach { (storeId, storeItems) ->
+            groups.forEach { (storeId, items) ->
                 item { Text("Store: $storeId") }
-                items(storeItems.size) { i ->
-                    val storeItem = storeItems[i]
-                    Text("${storeItem.product.name} x${storeItem.qty} — ₦${storeItem.product.price}")
+                items(items.size) { i ->
+                    val it = items[i]
+                    Text("${it.product.name} x${it.qty} — ₦${it.product.price}")
                 }
             }
         }
