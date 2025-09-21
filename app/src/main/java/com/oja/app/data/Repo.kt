@@ -49,4 +49,9 @@ object Repo {
     fun claimJob(jobId: String, transporterId: String) {
         _jobs.update { list -> list.map { if (it.id == jobId) it.copy(claimedByTransporterId = transporterId) else it } }
     }
+
+    internal fun resetForTesting() {
+        _cart.value = CartState()
+        _jobs.value = emptyList()
+    }
 }

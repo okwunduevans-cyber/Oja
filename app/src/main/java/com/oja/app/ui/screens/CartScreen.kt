@@ -2,6 +2,8 @@ package com.oja.app.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.item
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -32,11 +34,10 @@ fun CartScreen(nav: NavHostController) {
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         LazyColumn(Modifier.weight(1f)) {
-            groups.forEach { (storeId, items) ->
+            groups.forEach { (storeId, storeItems) ->
                 item { Text("Store: $storeId") }
-                items(items.size) { i ->
-                    val it = items[i]
-                    Text("${it.product.name} x${it.qty} — ₦${it.product.price}")
+                items(storeItems) { cartItem ->
+                    Text("${cartItem.product.name} x${cartItem.qty} — ₦${cartItem.product.price}")
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.oja.app.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -22,8 +23,7 @@ fun HomeScreen(nav: NavHostController) {
         }
         Spacer(Modifier.height(8.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(Repo.products.size) { idx ->
-                val p = Repo.products[idx]
+            items(Repo.products) { p ->
                 Card(Modifier.fillMaxWidth().padding(2.dp)) {
                     Column(Modifier.padding(12.dp)) {
                         Text(p.name)

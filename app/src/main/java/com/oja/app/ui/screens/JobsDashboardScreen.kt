@@ -3,6 +3,7 @@ package com.oja.app.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -28,8 +29,7 @@ fun JobsDashboardScreen(nav: NavHostController) {
         Text("Unclaimed Deliveries")
         Spacer(Modifier.height(8.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(jobs.size) { i ->
-                val j = jobs[i]
+            items(jobs) { j ->
                 JobCard(j, onTrack = { nav.navigate(Route.Track.path(j.orderId)) }, onClaim = {
                     scope.launch {
                         delay(300)
