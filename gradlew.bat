@@ -34,7 +34,12 @@ set APP_HOME=%DIRNAME%
 
 set WRAPPER_JAR=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 set WRAPPER_PROPS=%APP_HOME%\gradle\wrapper\gradle-wrapper.properties
+set WRAPPER_BASE64=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar.base64
 if not exist "%WRAPPER_JAR%" (
+    if exist "%WRAPPER_BASE64%" (
+        powershell -NoProfile -Command "try { $bytes = [Convert]::FromBase64String((Get-Content -Raw -LiteralPath '%WRAPPER_BASE64%')); [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName('%WRAPPER_JAR%')) | Out-Null; [IO.File]::WriteAllBytes('%WRAPPER_JAR%', $bytes) } catch { exit 1 }"
+    )
+    if exist "%WRAPPER_JAR%" goto wrapperReady
     set WRAPPER_VERSION=8.7
     set DISTRIBUTION_URL=
     if exist "%WRAPPER_PROPS%" (
