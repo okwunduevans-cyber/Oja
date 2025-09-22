@@ -18,6 +18,24 @@ This backlog converts the production blueprint into execution-ready tasks. Each 
 
 ## Production blueprint (no-gap delivery plan)
 
+## Launch-readiness & view-testing milestones
+
+The table below reframes each delivery stage into testable launch checkpoints so teams know exactly when the Android app can be
+opened, exercised, and exposed to real users. Every milestone requires that the listed validation steps be executed and signed
+off before moving to the next stage.
+
+| Stage | Focus | App availability | Required validation before advancing |
+|-------|-------|------------------|---------------------------------------|
+| Stage 0 – Foundation & guardrails | Compliance, processor contracts, infrastructure, IAM | **Internal prototype only.** App may be launched on internal devices using mock data, but no external users or production data. | ✅ Compliance checklist signed, ✅ infrastructure smoke deploys, ✅ security review for IAM/secrets. |
+| Stage A – Payments & address correctness | Replace mocks with real auth/catalog/order/payment/address services and SDK integrations | **Closed staging build.** App can be installed by QA to validate welcome, browse, checkout, address picker, and ₦100 live payments end-to-end. | ✅ Contract/integration tests green, ✅ ₦100 payment run recorded, ✅ Android staging smoke (launch → browse → checkout → receipt). |
+| Stage B – Real-time logistics | Sendbox integration, live tracking, transporter job board | **Staging w/ logistics pilots.** Launchable to pilot couriers and ops to view live order timelines. | ✅ WebSocket load test (<300 ms p95), ✅ Foreground tracking instrumentation test, ✅ Field drive test covering Lagos & Abuja routes. |
+| Stage C – Vendor tooling | Vendor onboarding, catalog management, bulk ingestion | **Extended staging / limited beta.** Vendors can log in and manage catalog via the app. | ✅ Bulk upload stress test (200 images/100 products), ✅ Pen-test storage permissions, ✅ Vendor dashboard UX review on device. |
+| Stage D – Courier operations | Proof-of-delivery, earnings, dispute workflows | **Beta-ready.** Courier network can run COD/POD flows on managed devices. | ✅ Concurrency stress (≥50 claims), ✅ Battery/performance profiling on low-end hardware, ✅ POD capture instrumentation. |
+| Stage E – Trust, support, analytics | Support center, privacy tooling, analytics, notifications | **Public launch candidate.** Buyers, vendors, couriers can install from store once legal sign-off is complete. | ✅ Dispute lifecycle QA, ✅ Data-subject request drill, ✅ Notification/analytics SLI monitoring live. |
+
+> **Launch gate reminder:** External distribution (Play Console listing or production backend traffic) is blocked until the prior
+stage’s validation checklist is complete. Keep the staging build separate from production until Stage E verification concludes.
+
 ### Stage 0 – Foundation & guardrails
 - **Organisational readiness:** Appoint DPO, document NDPA processing records, and finalise incident-response playbooks before ingesting production data.
 - **Processor agreements:** Countersign Paystack, Flutterwave, Sendbox, and Kwik DPAs; enable Google Cloud billing with Maps budget alerts.

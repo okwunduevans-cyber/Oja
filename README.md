@@ -20,12 +20,29 @@ OJA is a Jetpack Compose prototype for a three-sided Nigerian commerce marketpla
 ```text
 app/
 ├── src/main/java/com/oja/app
-│   ├── data/        # In-memory models and repository that simulate marketplace behavior
-│   ├── net/         # WebSocket configuration placeholder pointing to the future backend
-│   ├── navigation/  # Route definitions for Navigation Compose
-│   ├── ui/          # Compose theme, root scaffold, and feature screens
-│   └── MainActivity.kt / OjaApp.kt
-├── src/main/res    # Resources including the Google Maps API key placeholder
+│   ├── core/            # Shared foundation for networking, data stores, logging, etc.
+│   ├── data/            # In-memory models and repository that simulate marketplace behavior
+│   ├── feature/         # Stage-aligned feature packages (auth, payments, logistics, vendor, ...)
+│   ├── net/             # WebSocket configuration placeholder pointing to the future backend
+│   ├── navigation/      # Route definitions for Navigation Compose
+│   └── ui/
+│       ├── components/  # Reusable Compose building blocks and design system glue
+│       ├── screens/     # Feature surfaces, further grouped by buyer/vendor/transporter flows
+│       ├── state/       # UI state holders separate from Composables
+│       └── viewmodel/   # Presentation-layer logic (Hilt wiring will land here later)
+├── src/main/res
+│   ├── color/           # Material color overrides and future dynamic palettes
+│   ├── drawable-night/  # Dark-mode artwork placeholders
+│   ├── font/            # Typeface assets once licensing is cleared
+│   ├── layout/          # XML fallbacks for non-Compose surfaces (if required)
+│   ├── mipmap-anydpi-v26/ # Adaptive launcher icons
+│   ├── raw/             # Seeded JSON and mock API payloads
+│   ├── values-night/    # Dark-mode theming tokens
+│   └── xml/             # Maps/Firebase config files
+├── src/androidTest/     # Instrumented test sources and resources
+├── src/test/            # JVM unit test sources and fixtures
+├── src/debug/           # Debug-only code/resources (e.g., logging overlays)
+├── src/release/         # Release build overrides
 ├── build.gradle.kts
 └── ...
 ```
