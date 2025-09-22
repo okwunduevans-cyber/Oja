@@ -40,12 +40,15 @@ rootProject.name = "OJA"
 include(":app")
 ```
 
+> **Compatibility note:** Compose BOM `2025.08.00` resolves to Compose 1.9, which requires Android Gradle Plugin 8.6.0 or newer. Make sure your project uses AGP ≥8.6.0 (and the matching Gradle wrapper) to avoid the Kotlin metadata/D8 warning referenced in the Android build docs.
+
 ## 2) Root `build.gradle.kts`
 
 ```kotlin
 plugins {
-    id("com.android.application") version "8.4.2" apply false
+    id("com.android.application") version "8.6.0" apply false
     id("org.jetbrains.kotlin.android") version "2.0.20" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20" apply false
 }
 ```
 
@@ -63,6 +66,7 @@ kotlin.code.style=official
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -97,7 +101,6 @@ android {
     kotlinOptions { jvmTarget = "17" }
 
     buildFeatures { compose = true }
-    composeOptions { kotlinCompilerExtensionVersion = "1.5.14" }
 
     packaging {
         resources.excludes += setOf(
@@ -156,10 +159,13 @@ dependencies {
 ## 5) `app/src/main/AndroidManifest.xml`
 
 ```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:name=".OjaApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        tools:replace="android:allowBackup"
         android:label="OJA"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
         <activity
