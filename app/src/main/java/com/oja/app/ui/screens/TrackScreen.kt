@@ -30,13 +30,12 @@ import kotlin.math.min
 @Composable
 fun TrackScreen(orderId: String, onBack: () -> Unit) {
     val job = Repo.jobs.value.firstOrNull { it.orderId == orderId }
+    if (job == null) {
+        Text("No tracking for ${'$'}orderId")
+        Button(onClick = onBack) { Text("Back") }
+        return
+    }
     Column(Modifier.fillMaxSize()) {
-        if (job == null) {
-            Text("No tracking for ${'$'}orderId")
-            Button(onClick = onBack) { Text("Back") }
-            return
-        }
-
         val start = com.google.android.gms.maps.model.LatLng(job.pickupLat, job.pickupLng)
         val end = com.google.android.gms.maps.model.LatLng(job.dropLat, job.dropLng)
         val cameraPositionState = rememberCameraPositionState {
