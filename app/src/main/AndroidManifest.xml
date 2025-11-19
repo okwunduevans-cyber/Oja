@@ -13,6 +13,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--
+            WARNING: You must replace the placeholder value in @string/google_maps_key
+            with your actual Google Maps API key. The app will fail to load Maps
+            functionality if the placeholder (e.g., "YOUR_MAPS_API_KEY_HERE") is used.
+            See strings.xml for details.
+        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
