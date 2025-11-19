@@ -79,7 +79,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 
     // Payments (adapters + SDKs)
-    implementation("com.paystack.android:paystack-ui:0.0.10") // check docs for latest before ship :contentReference[oaicite:7]{index=7}
+    implementation("com.paystack.android:paystack-ui:0.0.10") // check docs for latest before ship
     implementation("com.github.flutterwave.rave-android:rave_android:2.2.1") // via JitPack :contentReference[oaicite:8]{index=8}
 
     debugImplementation("androidx.compose.ui:ui-tooling")
