@@ -28,7 +28,7 @@ fun AppRoot() {
             composable(Route.TransporterSignup.path) { TransporterSignupScreen(nav) }
             composable(Route.VendorSignup.path) { VendorSignupScreen(nav) }
             composable(Route.Payments.path) { PaymentsScreen(nav) }
-            composable(Route.Track.path) { backStackEntry ->
+            composable("track/{orderId}") { backStackEntry ->
                 val orderId = backStackEntry.arguments?.getString("orderId").orEmpty()
                 TrackScreen(orderId = orderId, onBack = { nav.popBackStack() })
             }
