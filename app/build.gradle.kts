@@ -75,7 +75,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // QR (scan/generate)
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0") // :contentReference[oaicite:6]{index=6}
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.5.3")
 
     // Payments (adapters + SDKs)
