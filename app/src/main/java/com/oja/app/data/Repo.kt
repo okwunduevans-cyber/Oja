@@ -31,7 +31,7 @@ object Repo {
         val cs = _cart.value
         val storeIds = cs.groupedByStore.keys.toList()
         val base = cs.subtotal
-        val extraFee = (storeIds.size - 1).coerceAtLeast(0) * 700
+        val extraFee = (storeIds.size - 1).coerceAtLeast(0) * 700L
         val total = base + extraFee
         val order = Order(id = "o-${'$'}{Random.nextInt(10000, 99999)}", storeIds, method, total)
         val jt = JobTicket(
