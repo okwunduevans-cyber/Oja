@@ -37,8 +37,7 @@ fun HomeScreen(nav: NavHostController) {
         }
         Spacer(Modifier.height(8.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(Repo.products.size) { idx ->
-                val product = Repo.products[idx]
+            items(Repo.products) { product ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
