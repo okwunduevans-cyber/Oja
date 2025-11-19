@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">OJA</string>
+    <!-- TODO: Replace the value below with your actual Google Maps API key.
+         The map functionality will not work until a valid API key is provided. -->
     <string name="google_maps_key">YOUR_MAPS_API_KEY_HERE</string>
     <string name="welcome_title">Welcome to OJA</string>
     <string name="welcome_sub">Your neighborhood market—street to doorstep</string>
