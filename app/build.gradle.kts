@@ -35,7 +35,7 @@ android {
     kotlinOptions { jvmTarget = "17" }
 
     buildFeatures { compose = true }
-    composeOptions { kotlinCompilerExtensionVersion = "1.5.14" }
+    composeOptions { kotlinCompilerExtensionVersion = "2.0.0" }
 
     packaging {
         resources.excludes += setOf(
