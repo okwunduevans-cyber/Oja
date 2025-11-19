@@ -3,6 +3,7 @@
         android:name=".OjaApp"
         android:allowBackup="true"
         android:label="OJA"
+        android:icon="@mipmap/ic_launcher"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
         <activity
             android:name=".MainActivity"
