@@ -351,7 +351,7 @@ fun PaymentsScreen(nav: NavHostController) {
                             }
                         }
                     },
-                    enabled = !isLoading && consentChecked
+                    enabled = !isLoading
                 ) { Text(strings.payments.nqrVerifyButton) }
             }
 
