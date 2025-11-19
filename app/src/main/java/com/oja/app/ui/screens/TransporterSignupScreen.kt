@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.oja.app.data.DeliveryMethod
 
 @Composable
 fun TransporterSignupScreen(nav: NavHostController) {
