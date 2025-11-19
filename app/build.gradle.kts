@@ -62,7 +62,7 @@ dependencies {
     // Maps Compose (explicit version as per docs)
     implementation("com.google.maps.android:maps-compose:6.7.1")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1") // :contentReference[oaicite:4]{index=4}
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // WebSockets + JSON (Ktor 3.x)
     implementation("io.ktor:ktor-client-okhttp:3.2.3") // :contentReference[oaicite:5]{index=5}
