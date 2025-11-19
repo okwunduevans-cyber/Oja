@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import com.oja.app.navigation.Route
 import com.oja.app.ui.screens.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppRoot() {
     OjaTheme {
