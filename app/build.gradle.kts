@@ -65,7 +65,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // WebSockets + JSON (Ktor 3.x)
-    implementation("io.ktor:ktor-client-okhttp:3.2.3") // :contentReference[oaicite:5]{index=5}
+    implementation("io.ktor:ktor-client-okhttp:3.2.3")
     implementation("io.ktor:ktor-client-websockets:3.2.3")
     implementation("io.ktor:ktor-client-content-negotiation:3.2.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.2.3")
