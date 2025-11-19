@@ -20,7 +20,6 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun TransporterSignupScreen(nav: NavHostController) {
-    var name by remember { mutableStateOf("") }
     var bike by remember { mutableStateOf(true) }
     var bicycle by remember { mutableStateOf(false) }
     var car by remember { mutableStateOf(false) }
