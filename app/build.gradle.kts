@@ -60,12 +60,12 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     // Maps Compose (explicit version as per docs)
-    implementation("com.google.maps.android:maps-compose:6.7.1") // :contentReference[oaicite:3]{index=3}
+    implementation("com.google.maps.android:maps-compose:6.7.1")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1") // :contentReference[oaicite:4]{index=4}
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // WebSockets + JSON (Ktor 3.x)
-    implementation("io.ktor:ktor-client-okhttp:3.2.3") // :contentReference[oaicite:5]{index=5}
+    implementation("io.ktor:ktor-client-okhttp:3.2.3")
     implementation("io.ktor:ktor-client-websockets:3.2.3")
     implementation("io.ktor:ktor-client-content-negotiation:3.2.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.2.3")
@@ -75,12 +75,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // QR (scan/generate)
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0") // :contentReference[oaicite:6]{index=6}
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.5.3")
 
     // Payments (adapters + SDKs)
-    implementation("com.paystack.android:paystack-ui:0.0.10") // check docs for latest before ship :contentReference[oaicite:7]{index=7}
-    implementation("com.github.flutterwave.rave-android:rave_android:2.2.1") // via JitPack :contentReference[oaicite:8]{index=8}
+    implementation("com.paystack.android:paystack-ui:0.0.10") // check docs for latest before ship
+    implementation("com.github.flutterwave.rave-android:rave_android:2.2.1") // via JitPack
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
