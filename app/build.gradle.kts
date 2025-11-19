@@ -80,7 +80,7 @@ dependencies {
 
     // Payments (adapters + SDKs)
     implementation("com.paystack.android:paystack-ui:0.0.10") // check docs for latest before ship
-    implementation("com.github.flutterwave.rave-android:rave_android:2.2.1") // via JitPack :contentReference[oaicite:8]{index=8}
+    implementation("com.github.flutterwave.rave-android:rave_android:2.2.1") // via JitPack
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
