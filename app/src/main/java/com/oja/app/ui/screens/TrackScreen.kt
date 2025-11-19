@@ -44,18 +44,14 @@ fun TrackScreen(orderId: String, onBack: () -> Unit) {
             start.longitude + (end.longitude - start.longitude) * progress
         )
 
-        if (com.google.android.libraries.maps.BuildConfig.VERSION_NAME != null) {
-            GoogleMap(
-                modifier = Modifier.weight(1f),
-                cameraPositionState = cameraPositionState
-            ) {
-                Polyline(points = listOf(start, end))
-                Marker(state = rememberMarkerState(position = start), title = "Pickup")
-                Marker(state = rememberMarkerState(position = end), title = "Dropoff")
-                Marker(state = rememberMarkerState(position = current), title = "Courier")
-            }
-        } else {
-            Box(Modifier.weight(1f)) { Text("Map placeholder (add Maps API key)") }
+        GoogleMap(
+            modifier = Modifier.weight(1f),
+            cameraPositionState = cameraPositionState
+        ) {
+            Polyline(points = listOf(start, end))
+            Marker(state = rememberMarkerState(position = start), title = "Pickup")
+            Marker(state = rememberMarkerState(position = end), title = "Dropoff")
+            Marker(state = rememberMarkerState(position = current), title = "Courier")
         }
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onBack) { Text("Back") }
