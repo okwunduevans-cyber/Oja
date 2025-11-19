@@ -60,7 +60,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     // Maps Compose (explicit version as per docs)
-    implementation("com.google.maps.android:maps-compose:6.7.1") // :contentReference[oaicite:3]{index=3}
+    implementation("com.google.maps.android:maps-compose:6.7.1")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.android.gms:play-services-location:21.0.1") // :contentReference[oaicite:4]{index=4}
 
