@@ -6,11 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
+import com.google.maps.android.compose.*
 import com.oja.app.data.Repo
 import kotlinx.coroutines.delay
 import kotlin.math.min
@@ -44,14 +40,18 @@ fun TrackScreen(orderId: String, onBack: () -> Unit) {
             start.longitude + (end.longitude - start.longitude) * progress
         )
 
-        GoogleMap(
-            modifier = Modifier.weight(1f),
-            cameraPositionState = cameraPositionState
-        ) {
-            Polyline(points = listOf(start, end))
-            Marker(state = rememberMarkerState(position = start), title = "Pickup")
-            Marker(state = rememberMarkerState(position = end), title = "Dropoff")
-            Marker(state = rememberMarkerState(position = current), title = "Courier")
+        if (com.google.android.libraries.maps.BuildConfig.VERSION_NAME != null) {
+            GoogleMap(
+                modifier = Modifier.weight(1f),
+                cameraPositionState = cameraPositionState
+            ) {
+                Polyline(points = listOf(start, end))
+                Marker(state = rememberMarkerState(position = start), title = "Pickup")
+                Marker(state = rememberMarkerState(position = end), title = "Dropoff")
+                Marker(state = rememberMarkerState(position = current), title = "Courier")
+            }
+        } else {
+            Box(Modifier.weight(1f)) { Text("Map placeholder (add Maps API key)") }
         }
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onBack) { Text("Back") }

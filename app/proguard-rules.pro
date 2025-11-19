@@ -1,1 +1,1 @@
-# Add project specific ProGuard rules here.
+# Proguard rules for the OJA app. Add custom keep rules as backend integrations mature.
