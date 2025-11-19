@@ -7,7 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import com.oja.app.ui.AppRoot
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { AppRoot() }
